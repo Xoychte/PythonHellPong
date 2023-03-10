@@ -52,42 +52,58 @@ def place_elements(windowWidth, windowHeight, lightGREY, ballX, ballY, ballRadiu
     pygame.draw.circle(window, ballColor, (ballX, ballY), ballRadius)
     pygame.draw.rect(window, lightGREY, (wallX, 0, windowWidth-wallX, windowHeight))
     window.blit(text1_obj, (windowWidth-((windowWidth - wallX)/2)-fontSize,windowHeight/2-fontSize/2))
-
-while continuer == True:
-    clock.tick(FPS)
-    window.fill(GREY)
     
-    font_obj = pygame.font.Font('freesansbold.ttf', fontSize)
-    text1_obj = font_obj.render(str(score), True, BLACK, lightGREY)
-    
-    for event in pygame.event.get() :
-        if event.type == QUIT:
-            continuer = False
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP] and paddleY >0:
-            paddleY -=5
-            momentum = -10
-        elif keys[pygame.K_DOWN] and paddleY + 100 < windowHeight:
-            paddleY +=5
-            momentum = 10
-        elif keys[pygame.K_RIGHT] and cheat == True:
-            paddleY = ballY-50
-            
-    
-    momentum = update_momentum(momentum)
-    ballX += ballSpeedX
-    ballY += ballSpeedY
-    
+def update_font():
+    global fontSize, newFontSize
+    if newFontSize > fontSize:
+        fontSize += 1
+def bouncing_ball_on_paddle():
+    global paddleX, paddleY, ballX, ballY, newScore, newFontSize, ballSpeedX, ballSpeedY, momentum
     if ballX < paddleX+35 and  paddleY<ballY<paddleY+100:
         print("hit paddle")
         ballSpeedX *= -1
         newScore+=abs(ballSpeedX)
         newFontSize = abs(ballSpeedX)*2
-        ballSpeedY +=int(momentum/2)
+        if abs(ballSpeedY) < 10:
+            ballSpeedY +=int(momentum/2)
         print("hit ball with", momentum, "momentum")
-
-    
-    
+def uppdate_wall_movement_timer():
+    global wallMovement
+    if wallMovement > 12:
+        wallMovement -=1
+def move_ball():
+    global ballX, ballSpeedX, ballY, ballSpeedY
+    ballX += ballSpeedX
+    ballY += ballSpeedY
+def update_score():
+    global score, newScore
+    if score < newScore:
+        score+=1
+def move_wall():
+    global wallX, wallMovement
+    if wallMovement > 0 and wallMovement <= 12:
+        wallX -= 1
+        wallMovement -=1
+def bounce_on_lower_wall():
+    global ballSpeedY
+    if ballY > windowHeight - ballRadius:
+        if ballSpeedY > 0:
+            ballSpeedY *= -1
+            print("new vertical speed=", ballSpeedY)
+        print("hit lower wall")
+def bounce_on_upper_wall():
+    global ballSpeedY
+    if ballY < ballRadius:       
+        if ballSpeedY < 0:
+            ballSpeedY *= -1
+            print("new vertical speed=", ballSpeedY)
+        print("hit upper wall")
+def lose():
+    if ballX < ballRadius:
+        print("lost")
+        pygame.quit()
+def bounce_ball_on_wall():
+    global wallMovement, ballSpeedY, ballSpeedX
     if ballX > wallX-ballRadius:        
         wallMovement = 15
         if ballSpeedY == 0:
@@ -100,34 +116,46 @@ while continuer == True:
             ballSpeedX += randint(0,2)      
             print("new ball speed=", ballSpeedX)
         ballSpeedX *= -1
-    if  ballX < ballRadius :
-        print("lost")
-        pygame.quit()
-    if ballY < ballRadius:       
-        if ballSpeedY < 0:
-            ballSpeedY = ballSpeedY / abs(ballSpeedY) * randint(1,5)
-            ballSpeedY *= -1
-            print("new vertical speed=", ballSpeedY)
-        print("hit upper wall")
-    if ballY > windowHeight - ballRadius:
-        if ballSpeedY > 0:
-            ballSpeedY = ballSpeedY / abs(ballSpeedY) * randint(1,5)
-            ballSpeedY *= -1
-            print("new vertical speed=", ballSpeedY)
-        print("hit lower wall")
+def test_all_events():
+    global paddleX, paddleY, momentum
+    for event in pygame.event.get() :
+        if event.type == QUIT:
+            continuer = False
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP] and paddleY >0:
+            paddleY -=5
+            momentum = -10
+        elif keys[pygame.K_DOWN] and paddleY + 100 < windowHeight:
+            paddleY +=5
+            momentum = 10
+        elif keys[pygame.K_RIGHT] and cheat == True:
+            paddleY = ballY-50
 
+while continuer == True:
+    clock.tick(FPS)
+    window.fill(GREY)
     
-    if wallMovement > 0 and wallMovement <= 12:
-        wallX -= 1
-        wallMovement -=1
-    if score < newScore:
-        score+=1
-    if wallMovement > 12:
-        wallMovement -=1
-    if fontSize < newFontSize:
-        fontSize +=1
+    font_obj = pygame.font.Font('freesansbold.ttf', fontSize)
+    text1_obj = font_obj.render(str(score), True, BLACK, lightGREY)
+    
+    
+    
+    test_all_events()
+    
+    momentum = update_momentum(momentum)
+    move_ball()
+    
+    lose()
+    bounce_ball_on_wall()
+    bouncing_ball_on_paddle()
+    bounce_on_upper_wall()
+    bounce_on_lower_wall()
+    move_wall()
+    
+    update_score()
+    uppdate_wall_movement_timer()
+    update_font()
     
     place_elements(windowWidth, windowHeight, lightGREY, ballX, ballY, ballRadius, ballColor, wallX, paddleX, paddleY, fontSize, window, paddle, text1_obj)
     pygame.display.flip()
 pygame.quit()
-    

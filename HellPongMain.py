@@ -4,6 +4,9 @@ from random import randint
 
 FPS = 60
 (windowWidth, windowHeight) = (1300, 900)
+gameWindow = ["MENU","GAMEMODE_WALL","GAMEMODE_DUEL"]
+usedGameWindow = 1
+
 
 GREY = (30,30,30)
 lightGREY = (100,100,100)
@@ -35,7 +38,7 @@ clock = pygame.time.Clock()
 window = pygame.display.set_mode((windowWidth, windowHeight), RESIZABLE)
 window.fill(GREY)
 font_obj = pygame.font.Font('freesansbold.ttf', fontSize)
-paddle = pygame.image.load("paddle32_100.png").convert_alpha()
+paddle = pygame.image.load("spite_player1_paddle.png").convert_alpha()
 
 
 continuer = True
@@ -57,6 +60,7 @@ def update_font():
     global fontSize, newFontSize
     if newFontSize > fontSize:
         fontSize += 1
+
 def bouncing_ball_on_paddle():
     global paddleX, paddleY, ballX, ballY, newScore, newFontSize, ballSpeedX, ballSpeedY, momentum
     if ballX < paddleX+35 and  paddleY<ballY<paddleY+100:
@@ -67,23 +71,28 @@ def bouncing_ball_on_paddle():
         if abs(ballSpeedY) < 10:
             ballSpeedY +=int(momentum/2)
         print("hit ball with", momentum, "momentum")
+
 def uppdate_wall_movement_timer():
     global wallMovement
     if wallMovement > 12:
         wallMovement -=1
+
 def move_ball():
     global ballX, ballSpeedX, ballY, ballSpeedY
     ballX += ballSpeedX
     ballY += ballSpeedY
+
 def update_score():
     global score, newScore
     if score < newScore:
         score+=1
+
 def move_wall():
     global wallX, wallMovement
     if wallMovement > 0 and wallMovement <= 12:
         wallX -= 1
         wallMovement -=1
+
 def bounce_on_lower_wall():
     global ballSpeedY
     if ballY > windowHeight - ballRadius:
@@ -91,6 +100,7 @@ def bounce_on_lower_wall():
             ballSpeedY *= -1
             print("new vertical speed=", ballSpeedY)
         print("hit lower wall")
+
 def bounce_on_upper_wall():
     global ballSpeedY
     if ballY < ballRadius:       
@@ -98,10 +108,12 @@ def bounce_on_upper_wall():
             ballSpeedY *= -1
             print("new vertical speed=", ballSpeedY)
         print("hit upper wall")
+
 def lose_when_ball_hits_left_wall():
     if ballX < ballRadius:
         print("lost")
         pygame.quit()
+
 def bounce_ball_on_wall():
     global wallMovement, ballSpeedY, ballSpeedX
     if ballX > wallX-ballRadius:        
@@ -116,6 +128,7 @@ def bounce_ball_on_wall():
             ballSpeedX += randint(0,2)      
             print("new ball speed=", ballSpeedX)
         ballSpeedX *= -1
+
 def test_all_events():
     global paddleX, paddleY, momentum
     for event in pygame.event.get() :
@@ -132,30 +145,32 @@ def test_all_events():
             paddleY = ballY-50
 
 while continuer == True:
-    clock.tick(FPS)
-    window.fill(GREY)
+    
     
     font_obj = pygame.font.Font('freesansbold.ttf', fontSize)
-    text1_obj = font_obj.render(str(score), True, BLACK, lightGREY)
     
     
     
-    test_all_events()
-    
-    momentum = update_momentum(momentum)
-    move_ball()
-    
-    lose_when_ball_hits_left_wall()
-    bounce_ball_on_wall()
-    bouncing_ball_on_paddle()
-    bounce_on_upper_wall()
-    bounce_on_lower_wall()
-    move_wall()
-    
-    update_score()
-    uppdate_wall_movement_timer()
-    update_font()
-    
-    place_elements(windowWidth, windowHeight, lightGREY, ballX, ballY, ballRadius, ballColor, wallX, paddleX, paddleY, fontSize, window, paddle, text1_obj)
-    pygame.display.flip()
+    while usedGameWindow == 1:
+        clock.tick(FPS)
+        window.fill(GREY)
+        text1_obj = font_obj.render(str(score), True, BLACK, lightGREY)
+        test_all_events()
+
+        momentum = update_momentum(momentum)
+        move_ball()
+
+        lose_when_ball_hits_left_wall()
+        bounce_ball_on_wall()
+        bouncing_ball_on_paddle()
+        bounce_on_upper_wall()
+        bounce_on_lower_wall()
+        move_wall()
+
+        update_score()
+        uppdate_wall_movement_timer()
+        update_font()
+
+        place_elements(windowWidth, windowHeight, lightGREY, ballX, ballY, ballRadius, ballColor, wallX, paddleX, paddleY, fontSize, window, paddle, text1_obj)
+        pygame.display.flip()
 pygame.quit()

@@ -98,7 +98,7 @@ def bounce_on_upper_wall():
             ballSpeedY *= -1
             print("new vertical speed=", ballSpeedY)
         print("hit upper wall")
-def lose():
+def lose_when_ball_hits_left_wall():
     if ballX < ballRadius:
         print("lost")
         pygame.quit()
@@ -125,10 +125,10 @@ def test_all_events():
         if keys[pygame.K_UP] and paddleY >0:
             paddleY -=5
             momentum = -10
-        elif keys[pygame.K_DOWN] and paddleY + 100 < windowHeight:
+        if keys[pygame.K_DOWN] and paddleY + 100 < windowHeight:
             paddleY +=5
             momentum = 10
-        elif keys[pygame.K_RIGHT] and cheat == True:
+        if keys[pygame.K_RIGHT] and cheat == True:
             paddleY = ballY-50
 
 while continuer == True:
@@ -145,7 +145,7 @@ while continuer == True:
     momentum = update_momentum(momentum)
     move_ball()
     
-    lose()
+    lose_when_ball_hits_left_wall()
     bounce_ball_on_wall()
     bouncing_ball_on_paddle()
     bounce_on_upper_wall()
